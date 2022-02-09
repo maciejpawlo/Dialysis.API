@@ -1,46 +1,81 @@
+using Dialysis.BLL.Authentication;
 using Dialysis.DAL;
+using Dialysis.DAL.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Dialysis.API
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddIdentity<User, IdentityRole>(cfg =>
 {
-    public class Program
+    cfg.User.RequireUniqueEmail = true;
+})
+    .AddEntityFrameworkStores<DialysisContext>();
+
+builder.Services.AddDbContext<DialysisContext>(
+    options =>
+        options.UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"])
+    );
+
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(cfg =>
+{
+    cfg.TokenValidationParameters = new TokenValidationParameters()
     {
-        public static void Main(string[] args)
-        {
-            var host = CreateHostBuilder(args).Build();
-            //note: 'dotnet run /seed' to seed database with sample data
-            if (args.Length > 0 && args[0].ToLower() == "/seed")
-            {
-                RunSeeding(host);
-                return;
-            }
+        ValidIssuer = builder.Configuration["Tokens:Issuer"],
+        ValidAudience = builder.Configuration["Tokens:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Tokens:Key"])),
+    };
+});
 
-            host.Run();
-        }
+builder.Services.AddTransient<DialysisSeeder>();
 
-        private static void RunSeeding(IHost host)
-        {
-            var scopeFactory = host.Services.GetService<IServiceScopeFactory>();
-            using (var scope = scopeFactory.CreateScope())
-            {
-                var seeder = scope.ServiceProvider.GetService<DialysisSeeder>();
-                seeder.SeedAsync().Wait();
-            }
-        }
+builder.Services.AddScoped<IJWTHandler, JWTHandler>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
-            public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Dialysis.API", Version = "v1" });
+});
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Dialysis.API v1"));
 }
+
+app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
+app.Run();
