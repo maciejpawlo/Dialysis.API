@@ -63,13 +63,12 @@ namespace Dialysis.BLL.Authentication
             return result;
         }
 
-        public JwtResponse RefreshToken(string userid, string accessToken, string refreshToken, DateTime date)
+        public JwtResponse RefreshToken(RefreshToken token, Claim[] claims, DateTime date)
         {
             //Check in db if refresh token exists
             //if exists AND is not expired/used then generate new access token AND revoke old token
             //if not then user has to authenticate again
 
-            var token = context.RefreshTokens.Where(x => x.Token == refreshToken).FirstOrDefault();
             if (token == null)
             {
                 return null;
@@ -85,8 +84,7 @@ namespace Dialysis.BLL.Authentication
                 return null;
             }
 
-            var claims = DecodeAccessToken(accessToken);
-            var newTokens = GenerateTokens(userid, claims, DateTime.UtcNow);
+            var newTokens = GenerateTokens(token.UserId, claims, DateTime.UtcNow);
             token.IsUsed = true;
             context.SaveChanges();
 

@@ -64,7 +64,18 @@ namespace Dialysis.BLL.Authentication
             if (refreshToken == null)
                 return null;
 
-            var jwtResult = jwtHandler.RefreshToken(refreshToken.UserId, refreshTokenRequest.AccessToken, refreshTokenRequest.RefreshToken, DateTime.UtcNow);
+            var user = await userManager.FindByIdAsync(refreshToken.UserId);
+            var role = await userManager.GetRolesAsync(user);
+
+            var claims = new[]
+            {
+                  new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                  new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                  new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+                  new Claim(ClaimTypes.Role, role.FirstOrDefault()),
+            };
+
+            var jwtResult = jwtHandler.RefreshToken(refreshToken, claims, DateTime.UtcNow);
 
             return new AuthenticateResponse
             {

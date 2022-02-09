@@ -11,7 +11,5 @@ namespace Dialysis.BE.Authentication
     {
         [Required]
         public string RefreshToken { get; set; }
-        [Required]
-        public string AccessToken { get; set; }
     }
 }
