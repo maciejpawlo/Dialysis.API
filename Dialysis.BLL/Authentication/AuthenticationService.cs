@@ -79,8 +79,8 @@ namespace Dialysis.BLL.Authentication
 
             return new AuthenticateResponse
             {
-                AccessToken = jwtResult.AccessToken,
-                RefreshToken = jwtResult.RefreshToken.Token,
+                AccessToken = jwtResult?.AccessToken,
+                RefreshToken = jwtResult?.RefreshToken.Token,
             };
         }
     }

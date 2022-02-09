@@ -78,4 +78,18 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
 });
 
+if (args.Length > 0 && args[0].ToLower() == "/seed")
+{
+    RunSeeding(app);
+    return;
+}
+
 app.Run();
+
+static void RunSeeding(WebApplication app)
+{
+    var scopeFactory = app.Services.GetService<IServiceScopeFactory>();
+    using var scope = scopeFactory.CreateScope();
+    var seeder = scope.ServiceProvider.GetService<DialysisSeeder>();
+    seeder.SeedAsync().Wait();
+}
