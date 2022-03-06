@@ -19,13 +19,11 @@ namespace Dialysis.BLL.Authentication
     {
         private readonly IConfiguration config;
         private readonly DialysisContext context;
-        private readonly UserManager<User> userManager;
 
-        public JWTHandler(IConfiguration config, DialysisContext context, UserManager<User> userManager)
+        public JWTHandler(IConfiguration config, DialysisContext context)
         {
             this.config = config;
             this.context = context;
-            this.userManager = userManager;
         }
 
         public JwtResponse GenerateTokens(string userId, Claim[] claims, DateTime date)
@@ -41,7 +39,6 @@ namespace Dialysis.BLL.Authentication
               expires: DateTime.UtcNow.AddMinutes(30),
               signingCredentials: creds);
 
-            //TODO: Save refresh token to db and return only refresh token string
             var refreshToken = new DAL.Entities.RefreshToken 
             {
                 Token = GenerateRefreshTokenString(),
@@ -97,12 +94,6 @@ namespace Dialysis.BLL.Authentication
             using var randomNumberGenerator = RandomNumberGenerator.Create();
             randomNumberGenerator.GetBytes(randomNumber);
             return Convert.ToBase64String(randomNumber);
-        }
-
-        private Claim[] DecodeAccessToken(string accessToken)
-        {
-            var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(accessToken);
-            return jwtToken.Claims.ToArray();
         }
     }
 }

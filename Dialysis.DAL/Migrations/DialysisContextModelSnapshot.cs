@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+#nullable disable
+
 namespace Dialysis.DAL.Migrations
 {
     [DbContext(typeof(DialysisContext))]
@@ -15,9 +17,42 @@ namespace Dialysis.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.13")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "6.0.2")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("Dialysis.DAL.Entities.Doctor", b =>
+                {
+                    b.Property<int>("DoctorID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DoctorID"), 1L, 1);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("PermissionNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UserID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("DoctorID");
+
+                    b.HasIndex("UserID")
+                        .IsUnique()
+                        .HasFilter("[UserID] IS NOT NULL");
+
+                    b.ToTable("Doctors");
+                });
 
             modelBuilder.Entity("Dialysis.DAL.Entities.Examination", b =>
                 {
@@ -41,7 +76,47 @@ namespace Dialysis.DAL.Migrations
 
                     b.HasKey("ExaminationID");
 
+                    b.HasIndex("PatientID");
+
                     b.ToTable("Examinations");
+                });
+
+            modelBuilder.Entity("Dialysis.DAL.Entities.Patient", b =>
+                {
+                    b.Property<int>("PatientID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientID"), 1L, 1);
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("PESEL")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UserID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PatientID");
+
+                    b.HasIndex("UserID")
+                        .IsUnique()
+                        .HasFilter("[UserID] IS NOT NULL");
+
+                    b.ToTable("Patients");
                 });
 
             modelBuilder.Entity("Dialysis.DAL.Entities.RefreshToken", b =>
@@ -133,20 +208,20 @@ namespace Dialysis.DAL.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AspNetUsers");
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("DoctorPatient", b =>
                 {
-                    b.Property<string>("DoctorsId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("DoctorsDoctorID")
+                        .HasColumnType("int");
 
-                    b.Property<string>("PatientsId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("PatientsPatientID")
+                        .HasColumnType("int");
 
-                    b.HasKey("DoctorsId", "PatientsId");
+                    b.HasKey("DoctorsDoctorID", "PatientsPatientID");
 
-                    b.HasIndex("PatientsId");
+                    b.HasIndex("PatientsPatientID");
 
                     b.ToTable("DoctorPatient");
                 });
@@ -175,15 +250,16 @@ namespace Dialysis.DAL.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AspNetRoles");
+                    b.ToTable("AspNetRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -199,15 +275,16 @@ namespace Dialysis.DAL.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims");
+                    b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -223,7 +300,7 @@ namespace Dialysis.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims");
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -245,7 +322,7 @@ namespace Dialysis.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins");
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -260,7 +337,7 @@ namespace Dialysis.DAL.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles");
+                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -279,36 +356,36 @@ namespace Dialysis.DAL.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens");
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("Dialysis.DAL.Entities.Doctor", b =>
                 {
-                    b.HasBaseType("Dialysis.DAL.Entities.User");
+                    b.HasOne("Dialysis.DAL.Entities.User", "User")
+                        .WithOne("Doctor")
+                        .HasForeignKey("Dialysis.DAL.Entities.Doctor", "UserID");
 
-                    b.Property<long>("PermissionNumber")
-                        .HasColumnType("bigint");
+                    b.Navigation("User");
+                });
 
-                    b.ToTable("Doctors");
+            modelBuilder.Entity("Dialysis.DAL.Entities.Examination", b =>
+                {
+                    b.HasOne("Dialysis.DAL.Entities.Patient", "Patient")
+                        .WithMany("Examinations")
+                        .HasForeignKey("PatientID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("Dialysis.DAL.Entities.Patient", b =>
                 {
-                    b.HasBaseType("Dialysis.DAL.Entities.User");
+                    b.HasOne("Dialysis.DAL.Entities.User", "User")
+                        .WithOne("Patient")
+                        .HasForeignKey("Dialysis.DAL.Entities.Patient", "UserID");
 
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Gender")
-                        .HasColumnType("int");
-
-                    b.Property<long>("PESEL")
-                        .HasColumnType("bigint");
-
-                    b.ToTable("Patients");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Dialysis.DAL.Entities.RefreshToken", b =>
@@ -324,13 +401,13 @@ namespace Dialysis.DAL.Migrations
                 {
                     b.HasOne("Dialysis.DAL.Entities.Doctor", null)
                         .WithMany()
-                        .HasForeignKey("DoctorsId")
+                        .HasForeignKey("DoctorsDoctorID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Dialysis.DAL.Entities.Patient", null)
                         .WithMany()
-                        .HasForeignKey("PatientsId")
+                        .HasForeignKey("PatientsPatientID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -386,22 +463,16 @@ namespace Dialysis.DAL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Dialysis.DAL.Entities.Doctor", b =>
-                {
-                    b.HasOne("Dialysis.DAL.Entities.User", null)
-                        .WithOne()
-                        .HasForeignKey("Dialysis.DAL.Entities.Doctor", "Id")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Dialysis.DAL.Entities.Patient", b =>
                 {
-                    b.HasOne("Dialysis.DAL.Entities.User", null)
-                        .WithOne()
-                        .HasForeignKey("Dialysis.DAL.Entities.Patient", "Id")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
+                    b.Navigation("Examinations");
+                });
+
+            modelBuilder.Entity("Dialysis.DAL.Entities.User", b =>
+                {
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
                 });
 #pragma warning restore 612, 618
         }

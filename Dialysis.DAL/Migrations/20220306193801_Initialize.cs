@@ -1,9 +1,11 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+#nullable disable
+
 namespace Dialysis.DAL.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class Initialize : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -46,22 +48,6 @@ namespace Dialysis.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Examinations",
-                columns: table => new
-                {
-                    ExaminationID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PatientID = table.Column<int>(type: "int", nullable: false),
-                    Weight = table.Column<double>(type: "float", nullable: false),
-                    Turbidity = table.Column<double>(type: "float", nullable: false),
-                    ImageURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Examinations", x => x.ExaminationID);
                 });
 
             migrationBuilder.CreateTable(
@@ -174,63 +160,110 @@ namespace Dialysis.DAL.Migrations
                 name: "Doctors",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DoctorID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PermissionNumber = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Doctors", x => x.Id);
+                    table.PrimaryKey("PK_Doctors", x => x.DoctorID);
                     table.ForeignKey(
-                        name: "FK_Doctors_AspNetUsers_Id",
-                        column: x => x.Id,
+                        name: "FK_Doctors_AspNetUsers_UserID",
+                        column: x => x.UserID,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Patients",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PatientID = table.Column<int>(type: "int", nullable: false),
+                    PatientID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PESEL = table.Column<long>(type: "bigint", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Patients", x => x.Id);
+                    table.PrimaryKey("PK_Patients", x => x.PatientID);
                     table.ForeignKey(
-                        name: "FK_Patients_AspNetUsers_Id",
-                        column: x => x.Id,
+                        name: "FK_Patients_AspNetUsers_UserID",
+                        column: x => x.UserID,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Token = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Token);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "DoctorPatient",
                 columns: table => new
                 {
-                    DoctorsId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PatientsId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    DoctorsDoctorID = table.Column<int>(type: "int", nullable: false),
+                    PatientsPatientID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DoctorPatient", x => new { x.DoctorsId, x.PatientsId });
+                    table.PrimaryKey("PK_DoctorPatient", x => new { x.DoctorsDoctorID, x.PatientsPatientID });
                     table.ForeignKey(
-                        name: "FK_DoctorPatient_Doctors_DoctorsId",
-                        column: x => x.DoctorsId,
+                        name: "FK_DoctorPatient_Doctors_DoctorsDoctorID",
+                        column: x => x.DoctorsDoctorID,
                         principalTable: "Doctors",
-                        principalColumn: "Id",
+                        principalColumn: "DoctorID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DoctorPatient_Patients_PatientsId",
-                        column: x => x.PatientsId,
+                        name: "FK_DoctorPatient_Patients_PatientsPatientID",
+                        column: x => x.PatientsPatientID,
                         principalTable: "Patients",
-                        principalColumn: "Id",
+                        principalColumn: "PatientID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Examinations",
+                columns: table => new
+                {
+                    ExaminationID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Weight = table.Column<double>(type: "float", nullable: false),
+                    Turbidity = table.Column<double>(type: "float", nullable: false),
+                    ImageURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PatientID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Examinations", x => x.ExaminationID);
+                    table.ForeignKey(
+                        name: "FK_Examinations_Patients_PatientID",
+                        column: x => x.PatientID,
+                        principalTable: "Patients",
+                        principalColumn: "PatientID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -274,9 +307,33 @@ namespace Dialysis.DAL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DoctorPatient_PatientsId",
+                name: "IX_DoctorPatient_PatientsPatientID",
                 table: "DoctorPatient",
-                column: "PatientsId");
+                column: "PatientsPatientID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Doctors_UserID",
+                table: "Doctors",
+                column: "UserID",
+                unique: true,
+                filter: "[UserID] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Examinations_PatientID",
+                table: "Examinations",
+                column: "PatientID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Patients_UserID",
+                table: "Patients",
+                column: "UserID",
+                unique: true,
+                filter: "[UserID] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -301,6 +358,9 @@ namespace Dialysis.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Examinations");
+
+            migrationBuilder.DropTable(
+                name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

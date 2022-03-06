@@ -1,3 +1,4 @@
+using Dialysis.BLL.Users;
 using Dialysis.BLL.Authentication;
 using Dialysis.DAL;
 using Dialysis.DAL.Entities;
@@ -22,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddIdentity<User, IdentityRole>(cfg =>
 {
-    cfg.User.RequireUniqueEmail = true;
+    cfg.User.RequireUniqueEmail = false;
 })
     .AddEntityFrameworkStores<DialysisContext>();
 
@@ -50,6 +51,7 @@ builder.Services.AddTransient<DialysisSeeder>();
 
 builder.Services.AddScoped<IJWTHandler, JWTHandler>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>

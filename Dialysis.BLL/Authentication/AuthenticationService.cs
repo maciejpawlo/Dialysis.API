@@ -39,7 +39,7 @@ namespace Dialysis.BLL.Authentication
 
                 var claims = new[]
                 {
-                  new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                  //new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                   new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
                   new Claim(ClaimTypes.Role, role.FirstOrDefault()),
@@ -69,7 +69,7 @@ namespace Dialysis.BLL.Authentication
 
             var claims = new[]
             {
-                  new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                  //new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                   new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
                   new Claim(ClaimTypes.Role, role.FirstOrDefault()),

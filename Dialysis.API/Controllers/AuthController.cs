@@ -41,7 +41,7 @@ namespace Dialysis.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public async Task<ActionResult<AuthenticateResponse>> Authenticate([FromBody] AuthenticateRequest request)
+        public async Task<ActionResult<AuthenticateResponse>> Authenticate(AuthenticateRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -75,26 +75,7 @@ namespace Dialysis.API.Controllers
             return Ok(refreshResult);
         }
 
-        //NOTE: For test reasons only
-        [Authorize(Roles = Role.Admin)]
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateUser(string userName, string password)
-        {
-            var existingUser = await userManager.FindByNameAsync(userName);
-            if (existingUser != null)
-            {
-                return BadRequest("User already exists!");
-            }
-
-            var user = new Doctor() { UserName = userName, PermissionNumber = 1111111 };
-
-            await userManager.CreateAsync(user, password);
-            await context.Doctors.AddAsync(user);
-            await context.SaveChangesAsync();
-            return Ok();
-        }
-
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("test")]
         public async Task<IActionResult> Test()
         {

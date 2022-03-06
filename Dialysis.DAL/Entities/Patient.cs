@@ -8,14 +8,20 @@ using System.Threading.Tasks;
 
 namespace Dialysis.DAL.Entities
 {
-    [Table("Patients")]
-    public class Patient : User
+    public class Patient
     {
+        public int PatientID { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public long PESEL { get; set; }
         public DateTime BirthDate { get; set; }
         public Gender Gender { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        public string UserID { get; set; }
+        public User User { get; set; }
+
         public ICollection<Doctor> Doctors { get; set; }
+        public ICollection<Examination> Examinations { get; set; }
     }
 }
