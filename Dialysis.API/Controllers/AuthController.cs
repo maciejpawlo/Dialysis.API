@@ -22,20 +22,10 @@ namespace Dialysis.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly SignInManager<User> signInManager;
-        private readonly UserManager<User> userManager;
-        private readonly IConfiguration config;
-        private readonly DialysisContext context;
         private readonly IAuthenticationService authenticationService;
 
-        public AuthController(SignInManager<User> signInManager, 
-            UserManager<User> userManager, IConfiguration config, 
-            DialysisContext context, IAuthenticationService authenticationService)
+        public AuthController(IAuthenticationService authenticationService)
         {
-            this.signInManager = signInManager;
-            this.userManager = userManager;
-            this.config = config;
-            this.context = context;
             this.authenticationService = authenticationService;
         }
 

@@ -24,7 +24,7 @@ namespace Dialysis.API.Controllers
         }
 
         [Authorize(Roles = Role.Admin)]
-        [HttpPost("createDoctor")]
+        [HttpPost("doctors")]
         public async Task<ActionResult<CreateDoctorResponse>> CreateDoctor(CreateDoctorRequest request)
         {
             var response = await userService.CreateDoctorAsync(request);
@@ -36,7 +36,7 @@ namespace Dialysis.API.Controllers
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
-        [HttpPost("createPatient")]
+        [HttpPost("patients")]
         public async Task<ActionResult<CreatePatientResponse>> CreatePatient(CreatePatientRequest request)
         {
             var response = await userService.CreatePatientAsync(request);
@@ -45,6 +45,72 @@ namespace Dialysis.API.Controllers
                 return BadRequest(response);
             }
             return Ok(response);
+        }
+
+        //[Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpPost("assignPatientToDoctor")]
+        public async Task<IActionResult> AssignPatientToDoctor(AssignPatientToDoctorRequest request)
+        {
+            var response = await userService.AssignPatientToDoctorAsync(request);
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        //[Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpPost("unassignPatientFromDoctor")]
+        public async Task<IActionResult> UnassignPatientFromDoctor(AssignPatientToDoctorRequest request)
+        {
+            var response = await userService.UnassignPatientFromDoctorAsync(request);
+            if (!response.IsSuccessful)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpDelete("doctors/{id:int}")]
+        public async Task<IActionResult> DeleteDoctor(int id)
+        {
+            return Ok();
+        }
+
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpDelete("patients/{id:int}")]
+        public async Task<IActionResult> DeletePatient(int id)
+        {
+            return Ok();
+        }
+
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpPut("doctors/{id:int}")]
+        public async Task<IActionResult> EditDoctor(int id)
+        {
+            return Ok();
+        }
+
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpPut("patients/{id:int}")]
+        public async Task<IActionResult> EditPatient(int id)
+        {
+            return Ok();
+        }
+
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpGet("doctors")]
+        public async Task<IActionResult> GetDoctors()
+        {
+            return Ok();
+        }
+
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpGet("patients")]
+        public async Task<IActionResult> GetPatients()
+        {
+            return Ok();
         }
     }
 }

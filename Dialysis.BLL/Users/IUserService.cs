@@ -1,4 +1,5 @@
-﻿using Dialysis.BE.Users;
+﻿using Dialysis.BE.Helpers;
+using Dialysis.BE.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,8 @@ namespace Dialysis.BLL.Users
     {
         Task<CreateDoctorResponse> CreateDoctorAsync(CreateDoctorRequest request);
         Task<CreatePatientResponse> CreatePatientAsync(CreatePatientRequest request);
+        Task<BaseResponse> AssignPatientToDoctorAsync(AssignPatientToDoctorRequest request);
+        Task<BaseResponse> UnassignPatientFromDoctorAsync(AssignPatientToDoctorRequest request);
+
     }
 }

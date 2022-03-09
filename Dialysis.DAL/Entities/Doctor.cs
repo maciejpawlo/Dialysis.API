@@ -19,5 +19,10 @@ namespace Dialysis.DAL.Entities
         public User User { get; set; }
 
         public ICollection<Patient> Patients { get; set; }
+
+        public Doctor()
+        {
+            Patients = new HashSet<Patient>();
+        }
     }
 }

@@ -99,5 +99,71 @@ namespace Dialysis.BLL.Users
             await context.SaveChangesAsync();
             return new CreatePatientResponse { Password = password, UserName = request.UserName, IsSuccessful = true };
         }
+
+        public async Task<BaseResponse> AssignPatientToDoctorAsync(AssignPatientToDoctorRequest request)
+        {
+            var patient = context.Patients
+                .Where(p => p.PatientID == request.PatientID)
+                .FirstOrDefault();
+
+            var doctor = context.Doctors
+                .Where(d => d.DoctorID == request.DoctorID)
+                .FirstOrDefault();
+
+            if (patient == null)
+                return new BaseResponse { IsSuccessful = false, Message = "Paitent with given id does not exist." };
+
+            if (doctor == null)
+                return new BaseResponse { IsSuccessful = false, Message = "Doctor with given id does not exist." };
+            try
+            {
+                doctor.Patients.Add(patient);
+                await context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return new BaseResponse 
+                { 
+                    IsSuccessful = false, 
+                    Message = $"An error was thrown while trying to assign patient to doctor: {e}" 
+                };
+            }
+
+            return new BaseResponse { IsSuccessful = true };
+        }
+
+        public async Task<BaseResponse> UnassignPatientFromDoctorAsync(AssignPatientToDoctorRequest request)
+        {
+            var patient = context.Patients
+                .Where(p => p.PatientID == request.PatientID)
+                .FirstOrDefault();
+
+            var doctor = context.Doctors
+                .Where(d => d.DoctorID == request.DoctorID)
+                .FirstOrDefault();
+
+            if (patient == null)
+                return new BaseResponse { IsSuccessful = false, Message = "Paitent with given id does not exist." };
+
+            if (doctor == null)
+                return new BaseResponse { IsSuccessful = false, Message = "Doctor with given id does not exist." };
+
+            try
+            {
+                await context.Entry(doctor).Collection("Patients").LoadAsync();
+                doctor.Patients.Remove(patient);
+                await context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return new BaseResponse
+                {
+                    IsSuccessful = false,
+                    Message = $"An error was thrown while trying to unassign patient from doctor: {e.Message}"
+                };
+            }
+
+            return new BaseResponse { IsSuccessful = true };
+        }
     }
 }
