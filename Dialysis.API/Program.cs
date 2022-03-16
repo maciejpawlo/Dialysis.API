@@ -53,6 +53,7 @@ builder.Services.AddScoped<IJWTHandler, JWTHandler>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
 {

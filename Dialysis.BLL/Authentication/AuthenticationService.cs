@@ -1,6 +1,7 @@
 ﻿using Dialysis.BE.Authentication;
 using Dialysis.DAL;
 using Dialysis.DAL.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace Dialysis.BLL.Authentication
 
         public async Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest authenticateRequest)
         {
+            var response = new AuthenticateResponse();
             var user = await userManager.FindByNameAsync(authenticateRequest.UserName);
             var result = await signInManager.CheckPasswordSignInAsync(user, authenticateRequest.Password, false);
 
@@ -45,24 +47,30 @@ namespace Dialysis.BLL.Authentication
                   new Claim(ClaimTypes.Role, role.FirstOrDefault()),
                 };
                 var jwtResult = jwtHandler.GenerateTokens(userId, claims, DateTime.UtcNow);
-
-                return new AuthenticateResponse 
-                { 
-                    AccessToken = jwtResult.AccessToken, 
-                    RefreshToken = jwtResult.RefreshToken.Token,
-                    UserName = authenticateRequest.UserName 
-                };
+                
+                response.IsSuccessful = true;
+                response.AccessToken = jwtResult.AccessToken;
+                response.UserName = authenticateRequest.UserName;
+                return response;
             }
-
-            return null;
+            response.StatusCode = StatusCodes.Status401Unauthorized;
+            response.IsSuccessful = false;
+            return response;
         }
 
         public async Task<AuthenticateResponse> ResfreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
         {
+            var response = new AuthenticateResponse();
+
             var refreshToken = context.RefreshTokens
                 .Where(x => x.Token == refreshTokenRequest.RefreshToken).FirstOrDefault();
             if (refreshToken == null)
-                return null;
+            {
+                response.IsSuccessful = false;
+                response.StatusCode = StatusCodes.Status404NotFound;
+                response.Message = "Refresh token invalid";
+                return response;
+            }
 
             var user = await userManager.FindByIdAsync(refreshToken.UserId);
             var role = await userManager.GetRolesAsync(user);
@@ -77,11 +85,10 @@ namespace Dialysis.BLL.Authentication
 
             var jwtResult = jwtHandler.RefreshToken(refreshToken, claims, DateTime.UtcNow);
 
-            return new AuthenticateResponse
-            {
-                AccessToken = jwtResult?.AccessToken,
-                RefreshToken = jwtResult?.RefreshToken.Token,
-            };
+            response.AccessToken = jwtResult.AccessToken;
+            response.RefreshToken = jwtResult?.RefreshToken.Token;
+            response.StatusCode = StatusCodes.Status200OK;
+            return response;
         }
     }
 }

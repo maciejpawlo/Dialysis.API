@@ -37,14 +37,8 @@ namespace Dialysis.API.Controllers
             {
                 return BadRequest();
             }
-
             var authResult = await authenticationService.AuthenticateAsync(request);
-            if (authResult == null)
-            {
-                return Unauthorized();
-            }
-
-            return Ok(authResult);
+            return StatusCode(authResult.StatusCode, authResult);
         }
 
         //[Authorize]
@@ -57,12 +51,7 @@ namespace Dialysis.API.Controllers
             }
 
             var refreshResult = await authenticationService.ResfreshTokenAsync(request);
-            if (refreshResult == null)
-            {
-                return Unauthorized();
-            }
-
-            return Ok(refreshResult);
+            return StatusCode(refreshResult.StatusCode, refreshResult);
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]

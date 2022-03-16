@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using IdentityPasswordGenerator;
 using Microsoft.Extensions.Options;
 using Dialysis.BLL.Users;
+using Dialysis.DAL.DTOs;
+using Dialysis.DAL.Helpers.Enums;
+using System;
 
 namespace Dialysis.API.Controllers
 {
@@ -28,11 +31,7 @@ namespace Dialysis.API.Controllers
         public async Task<ActionResult<CreateDoctorResponse>> CreateDoctor(CreateDoctorRequest request)
         {
             var response = await userService.CreateDoctorAsync(request);
-            if (!response.IsSuccessful)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
+            return StatusCode(response.StatusCode ,response);
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
@@ -40,77 +39,94 @@ namespace Dialysis.API.Controllers
         public async Task<ActionResult<CreatePatientResponse>> CreatePatient(CreatePatientRequest request)
         {
             var response = await userService.CreatePatientAsync(request);
-            if (!response.IsSuccessful)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
+            return StatusCode(response.StatusCode, response);
         }
 
-        //[Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPost("assignPatientToDoctor")]
-        public async Task<IActionResult> AssignPatientToDoctor(AssignPatientToDoctorRequest request)
+        public async Task<ActionResult<BaseResponse>> AssignPatientToDoctor(AssignPatientToDoctorRequest request)
         {
             var response = await userService.AssignPatientToDoctorAsync(request);
-            if (!response.IsSuccessful)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
+            return StatusCode(response.StatusCode, response);
         }
 
-        //[Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPost("unassignPatientFromDoctor")]
-        public async Task<IActionResult> UnassignPatientFromDoctor(AssignPatientToDoctorRequest request)
+        public async Task<ActionResult<BaseResponse>> UnassignPatientFromDoctor(AssignPatientToDoctorRequest request)
         {
             var response = await userService.UnassignPatientFromDoctorAsync(request);
-            if (!response.IsSuccessful)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
+            return StatusCode(response.StatusCode,response);
         }
 
         [Authorize(Roles = Role.Admin)]
         [HttpDelete("doctors/{id:int}")]
-        public async Task<IActionResult> DeleteDoctor(int id)
+        public async Task<ActionResult<BaseResponse>> DeleteDoctor(int id)
         {
-            return Ok();
+            var resposne = await userService.DeleteDoctor(id);
+            return StatusCode(resposne.StatusCode, resposne);
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpDelete("patients/{id:int}")]
-        public async Task<IActionResult> DeletePatient(int id)
+        public async Task<ActionResult<BaseResponse>> DeletePatient(int id)
         {
-            return Ok();
+            var response = await userService.DeletePatient(id);
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPut("doctors/{id:int}")]
-        public async Task<IActionResult> EditDoctor(int id)
+        public async Task<IActionResult> EditDoctor(int id, [FromBody] DoctorDTO doctorDTO)
         {
-            return Ok();
+            var response = await userService.EditDoctor(id, doctorDTO);
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPut("patients/{id:int}")]
-        public async Task<IActionResult> EditPatient(int id)
+        public async Task<IActionResult> EditPatient(int id, [FromBody] PatientDTO patientDTO)
         {
-            return Ok();
+            var response = await userService.EditPatient(id, patientDTO);
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("doctors")]
-        public async Task<IActionResult> GetDoctors()
+        public async Task<ActionResult<GetDoctorsResponse>> GetDoctors(string firstName, string lastName, long? permissionNumber, bool includePatients = false)
         {
-            return Ok();
+            var response = await userService.GetDoctors(includePatients, x => (firstName == null || x.FirstName.Contains(firstName)) 
+            && (lastName == null || x.LastName.Contains(lastName))
+            && (permissionNumber == null || x.PermissionNumber == permissionNumber.Value));
+
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("patients")]
-        public async Task<IActionResult> GetPatients()
+        public async Task<ActionResult<GetPatientsResponse>> GetPatients(string firstName, string lastName, string pesel, string gender, bool includeDoctors = false)
         {
-            return Ok();
+            var response = await userService.GetPatients(includeDoctors, x => (firstName == null || x.FirstName.Contains(firstName))
+            && (lastName == null || x.LastName.Contains(lastName))
+            && (pesel == null || x.PESEL == long.Parse(pesel))
+            && (gender == null || x.Gender == (Gender) int.Parse(gender)));
+
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpGet("doctors/{id:int}")]
+        public async Task<ActionResult<GetDoctorsResponse>> GetDoctorByID(int id)
+        {
+            var response = await userService.GetDoctors(true, x => x.DoctorID == id);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
+        [HttpGet("patients/{id:int}")]
+        public async Task<ActionResult<GetPatientsResponse>> GetPatientByID(int id)
+        {
+            var response = await userService.GetPatients(true, x => x.PatientID == id);
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

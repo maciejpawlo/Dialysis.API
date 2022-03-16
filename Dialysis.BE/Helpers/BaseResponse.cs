@@ -11,5 +11,6 @@ namespace Dialysis.BE.Helpers
         public bool IsSuccessful { get; set; }
         public string Message { get; set; }
         public List<string> Errors { get; set; }
+        public int StatusCode { get; set; }
     }
 }
