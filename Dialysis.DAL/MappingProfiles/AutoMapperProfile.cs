@@ -19,6 +19,9 @@ namespace Dialysis.DAL.MappingProfiles
             CreateMap<PatientDTO, Patient>()
                 .ForMember(x => x.PatientID, opt => opt.Ignore());
             CreateMap<Patient, PatientDTO>();
+            CreateMap<ExaminationDTO, Examination>()
+                .ForMember(x => x.ExaminationID, opt => opt.Ignore());
+            CreateMap<Examination, ExaminationDTO>();
         }
     }
 }

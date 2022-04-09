@@ -12,7 +12,7 @@ namespace Dialysis.DAL.Entities
         public int DoctorID { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public long PermissionNumber { get; set; }
+        public string PermissionNumber { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public string UserID { get; set; }

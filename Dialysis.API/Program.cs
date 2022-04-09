@@ -18,6 +18,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IdentityPasswordGenerator;
+using Dialysis.BLL.Examinations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +54,8 @@ builder.Services.AddTransient<DialysisSeeder>();
 builder.Services.AddScoped<IJWTHandler, JWTHandler>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddSingleton<IPasswordGenerator, PasswordGenerator>();
+builder.Services.AddScoped<IExaminationRepository, ExaminationRepository>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();

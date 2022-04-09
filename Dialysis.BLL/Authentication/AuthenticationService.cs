@@ -1,4 +1,5 @@
 ﻿using Dialysis.BE.Authentication;
+using Dialysis.BE.Helpers;
 using Dialysis.DAL;
 using Dialysis.DAL.Entities;
 using Microsoft.AspNetCore.Http;
@@ -55,6 +56,20 @@ namespace Dialysis.BLL.Authentication
             }
             response.StatusCode = StatusCodes.Status401Unauthorized;
             response.IsSuccessful = false;
+            return response;
+        }
+
+        public async Task<BaseResponse> ChangePassword(ChangePasswordRequest resetPasswordRequest, string userName)
+        {
+            var response = new BaseResponse();
+            var user = await userManager.FindByNameAsync(userName);
+            var changePasswordResult = await userManager.ChangePasswordAsync(user, resetPasswordRequest.OldPassword, resetPasswordRequest.NewPassword);
+            if (!changePasswordResult.Succeeded)
+            {
+                response.StatusCode = StatusCodes.Status401Unauthorized;
+                return response;
+            }
+            response.StatusCode = StatusCodes.Status200OK;
             return response;
         }
 

@@ -54,6 +54,19 @@ namespace Dialysis.API.Controllers
             return StatusCode(refreshResult.StatusCode, refreshResult);
         }
 
+        [Authorize]
+        [HttpPost("changePassword")]
+        public async Task<ActionResult<BaseResponse>> ChangePassword(ChangePasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var changePasswordResult = await authenticationService.ChangePassword(request, HttpContext.User.Identity.Name);
+            return StatusCode(changePasswordResult.StatusCode, changePasswordResult);
+        }
+
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("test")]
         public async Task<IActionResult> Test()

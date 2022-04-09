@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 
 namespace Dialysis.DAL.DTOs
 {
-    public class DoctorDTO
+    public class ExaminationDTO
     {
-        public int DoctorID { get; set; }
+        public int ExaminationID { get; set; }
         [Required]
-        public string FirstName { get; set; }
+        public double Weight { get; set; }
         [Required]
-        public string LastName { get; set; }
+        public double Turbidity { get; set; }
+        public string ImageURL { get; set; }
         [Required]
-        public string PermissionNumber { get; set; }
+        public int PatientID { get; set; }
     }
 }

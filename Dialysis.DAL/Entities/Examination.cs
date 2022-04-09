@@ -9,7 +9,7 @@ namespace Dialysis.DAL.Entities
 {
     public class Examination
     {
-        public string ExaminationID { get; set; }
+        public int ExaminationID { get; set; }
         public double Weight { get; set; }
         public double Turbidity { get; set; }
         public string ImageURL { get; set; }

@@ -39,8 +39,8 @@ namespace Dialysis.DAL.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("PermissionNumber")
-                        .HasColumnType("bigint");
+                    b.Property<string>("PermissionNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserID")
                         .HasColumnType("nvarchar(450)");
@@ -56,8 +56,11 @@ namespace Dialysis.DAL.Migrations
 
             modelBuilder.Entity("Dialysis.DAL.Entities.Examination", b =>
                 {
-                    b.Property<string>("ExaminationID")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("ExaminationID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExaminationID"), 1L, 1);
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -104,8 +107,8 @@ namespace Dialysis.DAL.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("PESEL")
-                        .HasColumnType("bigint");
+                    b.Property<string>("PESEL")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserID")
                         .HasColumnType("nvarchar(450)");

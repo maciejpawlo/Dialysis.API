@@ -92,11 +92,11 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("doctors")]
-        public async Task<ActionResult<GetDoctorsResponse>> GetDoctors(string firstName, string lastName, long? permissionNumber, bool includePatients = false)
+        public async Task<ActionResult<GetDoctorsResponse>> GetDoctors(string firstName, string lastName, string permissionNumber, bool includePatients = false)
         {
             var response = await userService.GetDoctors(includePatients, x => (firstName == null || x.FirstName.Contains(firstName)) 
             && (lastName == null || x.LastName.Contains(lastName))
-            && (permissionNumber == null || x.PermissionNumber == permissionNumber.Value));
+            && (permissionNumber == null || x.PermissionNumber.Contains(permissionNumber)));
 
             return StatusCode(response.StatusCode, response);
         }
@@ -107,7 +107,7 @@ namespace Dialysis.API.Controllers
         {
             var response = await userService.GetPatients(includeDoctors, x => (firstName == null || x.FirstName.Contains(firstName))
             && (lastName == null || x.LastName.Contains(lastName))
-            && (pesel == null || x.PESEL == long.Parse(pesel))
+            && (pesel == null || x.PESEL == pesel)
             && (gender == null || x.Gender == (Gender) int.Parse(gender)));
 
             return StatusCode(response.StatusCode, response);

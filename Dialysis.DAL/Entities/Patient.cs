@@ -13,7 +13,7 @@ namespace Dialysis.DAL.Entities
         public int PatientID { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public long PESEL { get; set; }
+        public string PESEL { get; set; }
         public DateTime BirthDate { get; set; }
         public Gender Gender { get; set; }
         public DateTime CreatedAt { get; set; }

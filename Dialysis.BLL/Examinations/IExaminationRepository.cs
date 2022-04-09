@@ -1,4 +1,5 @@
-﻿using Dialysis.DAL.Entities;
+﻿using Dialysis.DAL.DTOs;
+using Dialysis.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace Dialysis.BLL.Examinations
 {
     public interface IExaminationRepository
     {
-        Task<IEnumerable<Examination>> GetAllExaminations();
-        Task<Examination> GetExaminationById(int id);
-        Task AddExamination(Examination examination);
-        Task DeleteExamination(int id);
-        Task UpdateExamination(int id);
+        Task<IEnumerable<ExaminationDTO>> GetAllExaminations();
+        Task<ExaminationDTO> GetExaminationById(int id);
+        Task<bool> AddExamination(ExaminationDTO examination);
+        Task<bool> DeleteExamination(int id);
+        Task<bool> EditExamination(int id, ExaminationDTO examination);
     }
 }

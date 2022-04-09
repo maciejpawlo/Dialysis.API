@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Dialysis.DAL.Migrations
 {
-    public partial class Initialize : Migration
+    public partial class InitMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -164,7 +164,7 @@ namespace Dialysis.DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PermissionNumber = table.Column<long>(type: "bigint", nullable: false),
+                    PermissionNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
@@ -186,7 +186,7 @@ namespace Dialysis.DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PESEL = table.Column<long>(type: "bigint", nullable: false),
+                    PESEL = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -249,7 +249,8 @@ namespace Dialysis.DAL.Migrations
                 name: "Examinations",
                 columns: table => new
                 {
-                    ExaminationID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ExaminationID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Weight = table.Column<double>(type: "float", nullable: false),
                     Turbidity = table.Column<double>(type: "float", nullable: false),
                     ImageURL = table.Column<string>(type: "nvarchar(max)", nullable: true),

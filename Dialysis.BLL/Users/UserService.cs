@@ -23,16 +23,18 @@ namespace Dialysis.BLL.Users
         private readonly DialysisContext context;
         private readonly IdentityOptions identityOptions;
         private readonly IMapper mapper;
+        private readonly IPasswordGenerator passwordGenerator;
 
-        public UserService(UserManager<User> userManager, 
+        public UserService(UserManager<User> userManager,
             DialysisContext context,
             IOptions<IdentityOptions> identityOptions,
-            IMapper mapper)
+            IMapper mapper, IPasswordGenerator passwordGenerator)
         {
             this.userManager = userManager;
             this.context = context;
             this.mapper = mapper;
             this.identityOptions = identityOptions?.Value;
+            this.passwordGenerator = passwordGenerator;
         }
 
         public async Task<CreateDoctorResponse> CreateDoctorAsync(CreateDoctorRequest request)
@@ -40,7 +42,7 @@ namespace Dialysis.BLL.Users
             var existingUser = await userManager.FindByNameAsync(request.UserName);
             if (existingUser != null)
             {
-                return new CreateDoctorResponse { IsSuccessful = false, Message = "User already exists!", StatusCode = StatusCodes.Status409Conflict };
+                return new CreateDoctorResponse { IsSuccessful = false, Message = "User already exists!", StatusCode = StatusCodes.Status400BadRequest };
             }
 
             var user = new User() 
@@ -50,7 +52,6 @@ namespace Dialysis.BLL.Users
                 UserName = request.UserName
             };
 
-            var passwordGenerator = new PasswordGenerator();
             var password = passwordGenerator.GeneratePassword(identityOptions.Password);
             
             await userManager.CreateAsync(user, password);
@@ -75,9 +76,9 @@ namespace Dialysis.BLL.Users
             var existingUser = await userManager.FindByNameAsync(request.UserName);
             if (existingUser != null)
             {
-                return new CreatePatientResponse { IsSuccessful = false, Message = "User already exists!" };
+                return new CreatePatientResponse { IsSuccessful = false, Message = "User already exists!", StatusCode = StatusCodes.Status400BadRequest };
             }
-            //TODO: PESEL validation
+            
             var user = new User()
             {
                 FirstName = request.Firstname,
@@ -85,7 +86,6 @@ namespace Dialysis.BLL.Users
                 UserName = request.UserName
             };
 
-            var passwordGenerator = new PasswordGenerator();
             var password = passwordGenerator.GeneratePassword(identityOptions.Password);
 
             await userManager.CreateAsync(user, password);
@@ -118,10 +118,10 @@ namespace Dialysis.BLL.Users
                 .FirstOrDefault();
 
             if (patient == null)
-                return new BaseResponse { IsSuccessful = false, Message = "Paitent with given id does not exist." };
+                return new BaseResponse { IsSuccessful = false, Message = "Paitent with given id does not exist.", StatusCode = StatusCodes.Status404NotFound };
 
             if (doctor == null)
-                return new BaseResponse { IsSuccessful = false, Message = "Doctor with given id does not exist." };
+                return new BaseResponse { IsSuccessful = false, Message = "Doctor with given id does not exist.", StatusCode = StatusCodes.Status404NotFound };
             try
             {
                 doctor.Patients.Add(patient);

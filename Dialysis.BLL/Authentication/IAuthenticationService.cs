@@ -1,4 +1,5 @@
 ﻿using Dialysis.BE.Authentication;
+using Dialysis.BE.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace Dialysis.BLL.Authentication
     {
         Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest authenticateRequest);
         Task<AuthenticateResponse> ResfreshTokenAsync(RefreshTokenRequest refreshTokenRequest);
+        Task<BaseResponse> ChangePassword(ChangePasswordRequest resetPasswordRequest, string userName);
     }
 }

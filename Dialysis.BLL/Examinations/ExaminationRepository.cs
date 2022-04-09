@@ -1,37 +1,88 @@
-﻿using Dialysis.DAL.Entities;
+﻿using Dialysis.DAL;
+using Dialysis.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using Dialysis.DAL.DTOs;
 
 namespace Dialysis.BLL.Examinations
 {
     public class ExaminationRepository : IExaminationRepository
     {
-        public Task AddExamination(Examination examination)
+        private readonly DialysisContext context;
+        private readonly IMapper mapper;
+
+        public ExaminationRepository(DialysisContext context, 
+            IMapper mapper)
         {
-            throw new NotImplementedException();
+            this.context = context;
+            this.mapper = mapper;
         }
 
-        public Task DeleteExamination(int id)
+        public async Task<bool> AddExamination(ExaminationDTO examination)
         {
-            throw new NotImplementedException();
+            var patient = await context.Patients.FindAsync(examination.PatientID);
+
+            if (patient == null)
+                return false;
+
+            var newExamination = mapper.Map<Examination>(examination);
+            await context.Examinations.AddAsync(newExamination);
+            return await context.SaveChangesAsync() > 0;
         }
 
-        public Task<IEnumerable<Examination>> GetAllExaminations()
+        public async Task<bool> DeleteExamination(int id)
         {
-            throw new NotImplementedException();
+            var examination = await context.Examinations
+                .FindAsync(id);
+
+            if (examination == null)
+                return false;
+
+            context.Examinations
+                .Remove(examination);
+            return await context.SaveChangesAsync() > 0;
         }
 
-        public Task<Examination> GetExaminationById(int id)
+        public async Task<IEnumerable<ExaminationDTO>> GetAllExaminations()
         {
-            throw new NotImplementedException();
+            var examinations = await context.Examinations
+                .AsNoTracking()
+                .ToListAsync();
+
+            var result = mapper.Map<IEnumerable<ExaminationDTO>>(examinations);
+
+            return result;
         }
 
-        public Task UpdateExamination(int id)
+        public async Task<ExaminationDTO> GetExaminationById(int id)
         {
-            throw new NotImplementedException();
+            var examination = await context.Examinations
+                .AsNoTracking()
+                .Where(e => e.ExaminationID == id)
+                .FirstOrDefaultAsync();
+
+            var result = mapper.Map<ExaminationDTO>(examination);
+
+            return result;
+        }
+
+        public async Task<bool> EditExamination(int id, ExaminationDTO examination)
+        {
+            var oldExamination = await context.Examinations
+                .Where(e => e.ExaminationID == id)
+                .FirstOrDefaultAsync();
+
+            if (oldExamination == null)
+                return false;
+
+            mapper.Map(examination, oldExamination);
+
+            return await context.SaveChangesAsync() > 0;
         }
     }
 }
