@@ -67,6 +67,19 @@ namespace Dialysis.API.Controllers
             return StatusCode(changePasswordResult.StatusCode, changePasswordResult);
         }
 
+        [Authorize]
+        [HttpPost("setFirstPassword")]
+        public async Task<ActionResult<BaseResponse>> SetFirstPassword(SetFirstPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var setFirstPasswordResult = await authenticationService.SetFirstPasswordAsync(request, HttpContext.User.Identity.Name);
+            return StatusCode(setFirstPasswordResult.StatusCode, setFirstPasswordResult);
+        }
+
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("test")]
         public async Task<IActionResult> Test()

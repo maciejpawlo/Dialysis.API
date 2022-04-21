@@ -105,5 +105,36 @@ namespace Dialysis.BLL.Authentication
             response.StatusCode = StatusCodes.Status200OK;
             return response;
         }
+
+        public async Task<BaseResponse> SetFirstPasswordAsync(SetFirstPasswordRequest request, string userName)
+        {
+            var response = new BaseResponse();
+            var user = await userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                response.StatusCode = StatusCodes.Status404NotFound;
+                response.Message = "Could not find user with matching username";
+                response.IsSuccessful = false;
+            }
+
+            if (string.IsNullOrEmpty(user.Email))
+            {
+                response.StatusCode = StatusCodes.Status400BadRequest;
+                response.Message = "User had already set the password";
+                response.IsSuccessful = false;
+            }
+
+            var setEmailResult = await userManager.SetEmailAsync(user, request.Email);
+            if (!setEmailResult.Succeeded)
+            {
+                response.StatusCode = StatusCodes.Status500InternalServerError;
+                response.Message = "Could set user's email";
+                response.IsSuccessful = false;
+            }
+
+            response.StatusCode = StatusCodes.Status200OK;
+            response.IsSuccessful = true;
+            return response;
+        }
     }
 }

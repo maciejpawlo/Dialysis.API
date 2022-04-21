@@ -13,5 +13,6 @@ namespace Dialysis.BLL.Authentication
         Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest authenticateRequest);
         Task<AuthenticateResponse> ResfreshTokenAsync(RefreshTokenRequest refreshTokenRequest);
         Task<BaseResponse> ChangePassword(ChangePasswordRequest resetPasswordRequest, string userName);
+        Task<BaseResponse> SetFirstPasswordAsync(SetFirstPasswordRequest request, string userName);
     }
 }
