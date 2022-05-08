@@ -1,4 +1,6 @@
-﻿using Dialysis.BLL.Examinations;
+﻿using Dialysis.BE.Helpers;
+using Dialysis.BLL.Examinations;
+using Dialysis.BLL.Users;
 using Dialysis.DAL.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +15,7 @@ namespace Dialysis.API.Controllers
     public class ExaminationsController : ControllerBase
     {
         private readonly IExaminationRepository repository;
+
         public ExaminationsController(IExaminationRepository repository)
         {
             this.repository = repository;
@@ -25,6 +28,7 @@ namespace Dialysis.API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = Role.Patient)]
         [HttpPost]
         public async Task<IActionResult> CreateExaminations([FromBody] ExaminationDTO examinationDTO)
         {

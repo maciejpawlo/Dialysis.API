@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Dialysis.BE.Users
 {
-    public class CreateDoctorResponse : BaseResponse
+    public class GetUserInfoResponse : BaseResponse
     {
-        public string UserName { get; set; }
-        public string Password { get; set; }
+        public object Details { get; set; }
     }
 }

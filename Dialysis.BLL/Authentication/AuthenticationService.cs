@@ -42,16 +42,18 @@ namespace Dialysis.BLL.Authentication
 
                 var claims = new[]
                 {
-                  //new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                  new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                  new Claim(JwtRegisteredClaimNames.Sub, userId),
                   new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-                  new Claim(ClaimTypes.Role, role.FirstOrDefault()),
+                  new Claim(ClaimTypes.Role, role.FirstOrDefault())
                 };
                 var jwtResult = jwtHandler.GenerateTokens(userId, claims, DateTime.UtcNow);
                 
                 response.IsSuccessful = true;
                 response.AccessToken = jwtResult.AccessToken;
                 response.UserName = authenticateRequest.UserName;
+                response.RefreshToken = jwtResult.RefreshToken.Token;
                 return response;
             }
             response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -59,11 +61,11 @@ namespace Dialysis.BLL.Authentication
             return response;
         }
 
-        public async Task<BaseResponse> ChangePassword(ChangePasswordRequest resetPasswordRequest, string userName)
+        public async Task<BaseResponse> ChangePassword(ChangePasswordRequest changePasswordRequest, string userName)
         {
             var response = new BaseResponse();
             var user = await userManager.FindByNameAsync(userName);
-            var changePasswordResult = await userManager.ChangePasswordAsync(user, resetPasswordRequest.OldPassword, resetPasswordRequest.NewPassword);
+            var changePasswordResult = await userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword, changePasswordRequest.NewPassword);
             if (!changePasswordResult.Succeeded)
             {
                 response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -92,7 +94,8 @@ namespace Dialysis.BLL.Authentication
 
             var claims = new[]
             {
-                  //new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                  new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                  new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? string.Empty),
                   new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
                   new Claim(ClaimTypes.Role, role.FirstOrDefault()),
@@ -128,9 +131,14 @@ namespace Dialysis.BLL.Authentication
             if (!setEmailResult.Succeeded)
             {
                 response.StatusCode = StatusCodes.Status500InternalServerError;
-                response.Message = "Could set user's email";
+                response.Message = "Could not set user's email";
                 response.IsSuccessful = false;
             }
+
+            //remove temporary password
+            await userManager.RemovePasswordAsync(user);
+            //set new password
+            await userManager.AddPasswordAsync(user, request.Password);
 
             response.StatusCode = StatusCodes.Status200OK;
             response.IsSuccessful = true;

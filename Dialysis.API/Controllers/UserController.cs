@@ -28,15 +28,15 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = Role.Admin)]
         [HttpPost("doctors")]
-        public async Task<ActionResult<CreateDoctorResponse>> CreateDoctor(CreateDoctorRequest request)
+        public async Task<ActionResult<CreateUserResponse>> CreateDoctor(CreateDoctorRequest request)
         {
             var response = await userService.CreateDoctorAsync(request);
-            return StatusCode(response.StatusCode ,response);
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPost("patients")]
-        public async Task<ActionResult<CreatePatientResponse>> CreatePatient(CreatePatientRequest request)
+        public async Task<ActionResult<CreateUserResponse>> CreatePatient(CreatePatientRequest request)
         {
             var response = await userService.CreatePatientAsync(request);
             return StatusCode(response.StatusCode, response);
@@ -55,7 +55,7 @@ namespace Dialysis.API.Controllers
         public async Task<ActionResult<BaseResponse>> UnassignPatientFromDoctor(AssignPatientToDoctorRequest request)
         {
             var response = await userService.UnassignPatientFromDoctorAsync(request);
-            return StatusCode(response.StatusCode,response);
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(Roles = Role.Admin)]
@@ -94,7 +94,7 @@ namespace Dialysis.API.Controllers
         [HttpGet("doctors")]
         public async Task<ActionResult<GetDoctorsResponse>> GetDoctors(string firstName, string lastName, string permissionNumber, bool includePatients = false)
         {
-            var response = await userService.GetDoctors(includePatients, x => (firstName == null || x.FirstName.Contains(firstName)) 
+            var response = await userService.GetDoctors(includePatients, x => (firstName == null || x.FirstName.Contains(firstName))
             && (lastName == null || x.LastName.Contains(lastName))
             && (permissionNumber == null || x.PermissionNumber.Contains(permissionNumber)));
 
@@ -108,7 +108,7 @@ namespace Dialysis.API.Controllers
             var response = await userService.GetPatients(includeDoctors, x => (firstName == null || x.FirstName.Contains(firstName))
             && (lastName == null || x.LastName.Contains(lastName))
             && (pesel == null || x.PESEL == pesel)
-            && (gender == null || x.Gender == (Gender) int.Parse(gender)));
+            && (gender == null || x.Gender == (Gender)int.Parse(gender)));
 
             return StatusCode(response.StatusCode, response);
         }
@@ -126,6 +126,28 @@ namespace Dialysis.API.Controllers
         public async Task<ActionResult<GetPatientsResponse>> GetPatientByID(int id)
         {
             var response = await userService.GetPatients(true, x => x.PatientID == id);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [Authorize(Role.Admin)]
+        [HttpPost("resetUsersPassword")]
+        public async Task<ActionResult<BaseResponse>> ResetUsersPassword(ResetUsersPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var response = await userService.ResetUsersPassword(request);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [Authorize]
+        [HttpGet("UserInfo")]
+        public async Task<ActionResult<BaseResponse>> GetUserInfo()
+        {
+            var name = HttpContext.User.Identity.Name;
+            var response = await userService.GetUserInfo(name);
             return StatusCode(response.StatusCode, response);
         }
     }
