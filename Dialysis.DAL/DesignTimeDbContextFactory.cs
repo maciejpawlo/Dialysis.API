@@ -16,7 +16,7 @@ namespace Dialysis.DAL
         {
             IConfiguration configuration = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json")
+                    .AddJsonFile("appsettings.dal.json")
                     .Build();
 
             var builder = new DbContextOptionsBuilder<DialysisContext>();

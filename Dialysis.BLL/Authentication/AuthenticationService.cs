@@ -33,6 +33,13 @@ namespace Dialysis.BLL.Authentication
         {
             var response = new AuthenticateResponse();
             var user = await userManager.FindByNameAsync(authenticateRequest.UserName);
+            if (user == null)
+            {
+                response.StatusCode = StatusCodes.Status401Unauthorized;
+                response.IsSuccessful = false;
+                return response;
+            }
+
             var result = await signInManager.CheckPasswordSignInAsync(user, authenticateRequest.Password, false);
 
             if (result.Succeeded)

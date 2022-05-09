@@ -22,7 +22,6 @@ using IdentityPasswordGenerator;
 using Dialysis.BLL.Examinations;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddIdentity<User, IdentityRole>(cfg =>
 {
     cfg.User.RequireUniqueEmail = false;
