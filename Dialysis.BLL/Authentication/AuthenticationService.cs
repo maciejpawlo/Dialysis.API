@@ -61,6 +61,7 @@ namespace Dialysis.BLL.Authentication
                 response.AccessToken = jwtResult.AccessToken;
                 response.UserName = authenticateRequest.UserName;
                 response.RefreshToken = jwtResult.RefreshToken.Token;
+                response.StatusCode = StatusCodes.Status200OK;
                 return response;
             }
             response.StatusCode = StatusCodes.Status401Unauthorized;
