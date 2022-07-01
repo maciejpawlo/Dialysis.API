@@ -12,6 +12,7 @@ using Dialysis.BLL.Users;
 using Dialysis.DAL.DTOs;
 using Dialysis.DAL.Helpers.Enums;
 using System;
+using System.Linq;
 
 namespace Dialysis.API.Controllers
 {
@@ -103,12 +104,13 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("patients")]
-        public async Task<ActionResult<GetPatientsResponse>> GetPatients(string firstName, string lastName, string pesel, string gender, bool includeDoctors = false)
+        public async Task<ActionResult<GetPatientsResponse>> GetPatients(string firstName, string lastName, string pesel, string gender, int? doctorID, bool includeDoctors = false)
         {
             var response = await userService.GetPatients(includeDoctors, x => (firstName == null || x.FirstName.Contains(firstName))
             && (lastName == null || x.LastName.Contains(lastName))
             && (pesel == null || x.PESEL == pesel)
-            && (gender == null || x.Gender == (Gender)int.Parse(gender)));
+            && (gender == null || x.Gender == (Gender)int.Parse(gender))
+            && (doctorID == null || x.Doctors.Any(d => d.DoctorID == doctorID)));
 
             return StatusCode(response.StatusCode, response);
         }
