@@ -132,7 +132,8 @@ namespace Dialysis.BLL.Users
                 return new BaseResponse
                 {
                     IsSuccessful = false,
-                    Message = $"An error was thrown while trying to assign patient to doctor: {e}"
+                    Message = $"An error was thrown while trying to assign patient to doctor: {e}",
+                    StatusCode = StatusCodes.Status500InternalServerError
                 };
             }
 
@@ -333,9 +334,9 @@ namespace Dialysis.BLL.Users
             return response;
         }
 
-        public async Task<BaseResponse> GetUserInfo(string userName)
+        public async Task<GetUserInfoResponse> GetUserInfo(string userName)
         {
-            var response = new BaseResponse();
+            var response = new GetUserInfoResponse();
             var user = await userManager.FindByNameAsync(userName);
             if (user == null)
             {
@@ -345,14 +346,21 @@ namespace Dialysis.BLL.Users
 
             var role = (await userManager.GetRolesAsync(user)).First();
 
+            response.UserName = user.UserName;
+            response.Role = role;
+            response.FirstName = user.FirstName;
+            response.LastName = user.LastName;
+
             switch (role)
             {
                 case Role.Doctor:
-                    response = await GetDoctors(false, x => x.UserID == user.Id);
+                    var doctorInfo = await GetDoctors(false, x => x.UserID == user.Id);
+                    response.InternalUserID = doctorInfo.Doctors.FirstOrDefault().DoctorID;
                     break;
 
                 case Role.Patient:
-                    response = await GetPatients(false, x => x.UserID == user.Id);
+                    var patientInfo = await GetPatients(false, x => x.UserID == user.Id);
+                    response.InternalUserID = patientInfo.Patients.FirstOrDefault().PatientID;
                     break;
 
                 default:

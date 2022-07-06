@@ -13,6 +13,7 @@ using Dialysis.DAL.DTOs;
 using Dialysis.DAL.Helpers.Enums;
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace Dialysis.API.Controllers
 {
@@ -29,6 +30,9 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = Role.Admin)]
         [HttpPost("doctors")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<CreateUserResponse>> CreateDoctor(CreateDoctorRequest request)
         {
             var response = await userService.CreateDoctorAsync(request);
@@ -37,6 +41,9 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPost("patients")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<CreateUserResponse>> CreatePatient(CreatePatientRequest request)
         {
             var response = await userService.CreatePatientAsync(request);
@@ -45,6 +52,10 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPost("assignPatientToDoctor")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<BaseResponse>> AssignPatientToDoctor(AssignPatientToDoctorRequest request)
         {
             var response = await userService.AssignPatientToDoctorAsync(request);
@@ -53,6 +64,10 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPost("unassignPatientFromDoctor")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<BaseResponse>> UnassignPatientFromDoctor(AssignPatientToDoctorRequest request)
         {
             var response = await userService.UnassignPatientFromDoctorAsync(request);
@@ -61,6 +76,10 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = Role.Admin)]
         [HttpDelete("doctors/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<BaseResponse>> DeleteDoctor(int id)
         {
             var resposne = await userService.DeleteDoctor(id);
@@ -69,6 +88,10 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpDelete("patients/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<BaseResponse>> DeletePatient(int id)
         {
             var response = await userService.DeletePatient(id);
@@ -77,7 +100,10 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPut("doctors/{id:int}")]
-        public async Task<IActionResult> EditDoctor(int id, [FromBody] DoctorDTO doctorDTO)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<BaseResponse>> EditDoctor(int id, [FromBody] DoctorDTO doctorDTO)
         {
             var response = await userService.EditDoctor(id, doctorDTO);
             return StatusCode(response.StatusCode, response);
@@ -85,7 +111,10 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpPut("patients/{id:int}")]
-        public async Task<IActionResult> EditPatient(int id, [FromBody] PatientDTO patientDTO)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<BaseResponse>> EditPatient(int id, [FromBody] PatientDTO patientDTO)
         {
             var response = await userService.EditPatient(id, patientDTO);
             return StatusCode(response.StatusCode, response);
@@ -93,6 +122,9 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("doctors")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<GetDoctorsResponse>> GetDoctors(string firstName, string lastName, string permissionNumber, bool includePatients = false)
         {
             var response = await userService.GetDoctors(includePatients, x => (firstName == null || x.FirstName.Contains(firstName))
@@ -104,6 +136,9 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("patients")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<GetPatientsResponse>> GetPatients(string firstName, string lastName, string pesel, string gender, int? doctorID, bool includeDoctors = false)
         {
             var response = await userService.GetPatients(includeDoctors, x => (firstName == null || x.FirstName.Contains(firstName))
@@ -117,6 +152,9 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("doctors/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<GetDoctorsResponse>> GetDoctorByID(int id)
         {
             var response = await userService.GetDoctors(true, x => x.DoctorID == id);
@@ -125,6 +163,9 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = $"{Role.Admin}, {Role.Doctor}")]
         [HttpGet("patients/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<GetPatientsResponse>> GetPatientByID(int id)
         {
             var response = await userService.GetPatients(true, x => x.PatientID == id);
@@ -133,6 +174,9 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Role.Admin)]
         [HttpPost("resetUsersPassword")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<BaseResponse>> ResetUsersPassword(ResetUsersPasswordRequest request)
         {
             if (!ModelState.IsValid)
@@ -146,7 +190,10 @@ namespace Dialysis.API.Controllers
 
         [Authorize]
         [HttpGet("UserInfo")]
-        public async Task<ActionResult<BaseResponse>> GetUserInfo()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<GetUserInfoResponse>> GetUserInfo()
         {
             var name = HttpContext.User.Identity.Name;
             var response = await userService.GetUserInfo(name);

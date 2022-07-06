@@ -9,6 +9,10 @@ namespace Dialysis.BE.Users
 {
     public class GetUserInfoResponse : BaseResponse
     {
-        public object Details { get; set; }
+        public string UserName { get; set; }
+        public string Role { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int InternalUserID { get; set; } //doctor id/patient id
     }
 }

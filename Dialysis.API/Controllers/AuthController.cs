@@ -31,6 +31,9 @@ namespace Dialysis.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<AuthenticateResponse>> Authenticate(AuthenticateRequest request)
         {
             if (!ModelState.IsValid)
@@ -41,8 +44,11 @@ namespace Dialysis.API.Controllers
             return StatusCode(authResult.StatusCode, authResult);
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPost("refreshToken")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<AuthenticateResponse>> RefreshToken(RefreshTokenRequest request)
         {
             if (!ModelState.IsValid)

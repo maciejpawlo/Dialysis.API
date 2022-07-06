@@ -23,6 +23,6 @@ namespace Dialysis.BLL.Users
         Task<GetDoctorsResponse> GetDoctors(bool includePatients, Func<Doctor, bool> filter = null);
         Task<GetPatientsResponse> GetPatients(bool includeDoctors, Func<Patient, bool> filter = null);
         Task<CreateUserResponse> ResetUsersPassword(ResetUsersPasswordRequest request);
-        Task<BaseResponse> GetUserInfo(string userName);
+        Task<GetUserInfoResponse> GetUserInfo(string userName);
     }
 }

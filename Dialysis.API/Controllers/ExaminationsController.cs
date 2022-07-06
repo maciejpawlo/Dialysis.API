@@ -21,7 +21,9 @@ namespace Dialysis.API.Controllers
             this.repository = repository;
         }
 
+        [Authorize(Roles = Role.Doctor)]
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetExaminations()
         {
             var result = await repository.GetAllExaminations();
@@ -30,6 +32,8 @@ namespace Dialysis.API.Controllers
 
         [Authorize(Roles = Role.Patient)]
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateExaminations([FromBody] ExaminationDTO examinationDTO)
         {
             if (!ModelState.IsValid)
@@ -45,6 +49,9 @@ namespace Dialysis.API.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteExaminations(int id)
         {
             if (!ModelState.IsValid)
@@ -61,6 +68,8 @@ namespace Dialysis.API.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> EditExaminations(int id, [FromBody] ExaminationDTO examinationDTO)
         {
             if (!ModelState.IsValid)
@@ -77,6 +86,9 @@ namespace Dialysis.API.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetExaminationByID(int id)
         {
             if (!ModelState.IsValid)
