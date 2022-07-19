@@ -48,6 +48,11 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+builder.Services.AddCors(p => p.AddPolicy("mycors", builder =>
+{
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
+
 builder.Services.AddTransient<DialysisSeeder>();
 
 builder.Services.AddScoped<IJWTHandler, JWTHandler>();
@@ -75,7 +80,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
-
+app.UseCors("mycors");
 app.UseAuthentication();
 app.UseAuthorization();
 

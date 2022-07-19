@@ -61,6 +61,7 @@ namespace Dialysis.BLL.Authentication
                 response.AccessToken = jwtResult.AccessToken;
                 response.UserName = authenticateRequest.UserName;
                 response.RefreshToken = jwtResult.RefreshToken.Token;
+                response.RefreshTokenExpireDate = jwtResult.RefreshToken.ExpiresAt;
                 response.StatusCode = StatusCodes.Status200OK;
                 return response;
             }
@@ -113,6 +114,7 @@ namespace Dialysis.BLL.Authentication
 
             response.AccessToken = jwtResult.AccessToken;
             response.RefreshToken = jwtResult?.RefreshToken.Token;
+            response.RefreshTokenExpireDate = (DateTime)jwtResult?.RefreshToken.ExpiresAt;
             response.StatusCode = StatusCodes.Status200OK;
             return response;
         }

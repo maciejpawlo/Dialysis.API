@@ -12,6 +12,7 @@ namespace Dialysis.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public class ExaminationsController : ControllerBase
     {
         private readonly IExaminationRepository repository;
