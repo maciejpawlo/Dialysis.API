@@ -5,6 +5,8 @@ using Dialysis.DAL.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Dialysis.API.Controllers
@@ -25,13 +27,13 @@ namespace Dialysis.API.Controllers
         [Authorize(Roles = Role.Doctor)]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetExaminations()
+        public async Task<ActionResult<IEnumerable<ExaminationDTO>>> GetExaminations()
         {
             var result = await repository.GetAllExaminations();
             return Ok(result);
         }
 
-        [Authorize(Roles = Role.Patient)]
+        [Authorize(Roles = $"{Role.Patient}, ${Role.Admin}")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -90,7 +92,7 @@ namespace Dialysis.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetExaminationByID(int id)
+        public async Task<ActionResult<ExaminationDTO>> GetExaminationByID(int id)
         {
             if (!ModelState.IsValid)
             {
@@ -104,5 +106,25 @@ namespace Dialysis.API.Controllers
             }
             return Ok(result);
         }
+
+        [HttpGet("examinationByPatientId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<ExaminationDTO>>> GetExaminationByPatientID(int patientId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var result = await repository.GetExaminationsByPatientId(patientId);
+            if (result is null)
+            {
+                return NotFound();
+            }
+            return Ok(result);
+        }
+
     }
 }

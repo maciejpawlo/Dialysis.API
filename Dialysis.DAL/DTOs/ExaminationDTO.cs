@@ -17,5 +17,6 @@ namespace Dialysis.DAL.DTOs
         public string ImageURL { get; set; }
         [Required]
         public int PatientID { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

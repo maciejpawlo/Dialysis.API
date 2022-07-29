@@ -44,7 +44,7 @@ namespace Dialysis.API.Controllers
             return StatusCode(authResult.StatusCode, authResult);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("refreshToken")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -56,7 +56,7 @@ namespace Dialysis.API.Controllers
                 return BadRequest();
             }
 
-            var refreshResult = await authenticationService.ResfreshTokenAsync(request);
+            var refreshResult = await authenticationService.RefreshTokenAsync(request);
             return StatusCode(refreshResult.StatusCode, refreshResult);
         }
 

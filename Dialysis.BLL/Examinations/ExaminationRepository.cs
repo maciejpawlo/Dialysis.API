@@ -91,7 +91,7 @@ namespace Dialysis.BLL.Examinations
             var examinations = await context.Examinations
                 .AsNoTracking()
                 .Where(e => e.PatientID == id)
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
             var result = mapper.Map<IEnumerable<ExaminationDTO>>(examinations);
 

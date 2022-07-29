@@ -84,7 +84,7 @@ namespace Dialysis.BLL.Authentication
             return response;
         }
 
-        public async Task<AuthenticateResponse> ResfreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
+        public async Task<AuthenticateResponse> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
         {
             var response = new AuthenticateResponse();
 
@@ -112,7 +112,15 @@ namespace Dialysis.BLL.Authentication
 
             var jwtResult = jwtHandler.RefreshToken(refreshToken, claims, DateTime.UtcNow);
 
-            response.AccessToken = jwtResult.AccessToken;
+            if (jwtResult is null)
+            {
+                response.IsSuccessful = false;
+                response.StatusCode = StatusCodes.Status404NotFound;
+                response.Message = "Refresh token invalid";
+                return response;
+            }
+
+            response.AccessToken = jwtResult?.AccessToken;
             response.RefreshToken = jwtResult?.RefreshToken.Token;
             response.RefreshTokenExpireDate = (DateTime)jwtResult?.RefreshToken.ExpiresAt;
             response.StatusCode = StatusCodes.Status200OK;
