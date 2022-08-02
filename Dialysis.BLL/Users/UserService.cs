@@ -282,6 +282,7 @@ namespace Dialysis.BLL.Users
         public async Task<GetDoctorsResponse> GetDoctors(bool includePatients, Func<Doctor, bool> filter = null)
         {
             var doctors = context.Doctors
+                .Include(x => x.Patients)
                 .AsNoTracking()
                 .Where(filter ?? (x => true)).ToList();
 

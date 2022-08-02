@@ -125,11 +125,12 @@ namespace Dialysis.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<GetDoctorsResponse>> GetDoctors(string firstName, string lastName, string permissionNumber, bool includePatients = false)
+        public async Task<ActionResult<GetDoctorsResponse>> GetDoctors(string firstName, string lastName, string permissionNumber, int? patientID, bool includePatients = false)
         {
             var response = await userService.GetDoctors(includePatients, x => (firstName == null || x.FirstName.Contains(firstName))
             && (lastName == null || x.LastName.Contains(lastName))
-            && (permissionNumber == null || x.PermissionNumber.Contains(permissionNumber)));
+            && (permissionNumber == null || x.PermissionNumber.Contains(permissionNumber))
+            && (patientID == null || x.Patients.Any(p => p.PatientID == patientID)));
 
             return StatusCode(response.StatusCode, response);
         }
