@@ -13,7 +13,11 @@ namespace Dialysis.DAL.DTOs
         [Required]
         public double Weight { get; set; }
         [Required]
-        public double Turbidity { get; set; }
+        public double TurbidityNTU { get; set; }
+        [Required]
+        public double TurbidityFAU { get; set; }
+        public int SystolicPressure { get; set; }
+        public int DiastolicPressure { get; set; }
         public string ImageURL { get; set; }
         [Required]
         public int PatientID { get; set; }
