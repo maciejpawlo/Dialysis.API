@@ -12,8 +12,8 @@ namespace Dialysis.BLL.Users
 {
     public interface IUserService
     {
-        Task<CreateDoctorResponse> CreateDoctorAsync(CreateDoctorRequest request);
-        Task<CreatePatientResponse> CreatePatientAsync(CreatePatientRequest request);
+        Task<CreateUserResponse> CreateDoctorAsync(CreateDoctorRequest request);
+        Task<CreateUserResponse> CreatePatientAsync(CreatePatientRequest request);
         Task<BaseResponse> AssignPatientToDoctorAsync(AssignPatientToDoctorRequest request);
         Task<BaseResponse> UnassignPatientFromDoctorAsync(AssignPatientToDoctorRequest request);
         Task<BaseResponse> DeleteDoctor(int id);
@@ -22,5 +22,7 @@ namespace Dialysis.BLL.Users
         Task<BaseResponse> EditPatient(int id, PatientDTO patientDTO);
         Task<GetDoctorsResponse> GetDoctors(bool includePatients, Func<Doctor, bool> filter = null);
         Task<GetPatientsResponse> GetPatients(bool includeDoctors, Func<Patient, bool> filter = null);
+        Task<CreateUserResponse> ResetUsersPassword(ResetUsersPasswordRequest request);
+        Task<GetUserInfoResponse> GetUserInfo(string userName);
     }
 }

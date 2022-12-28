@@ -37,15 +37,15 @@ namespace Dialysis.BLL.Users
             this.passwordGenerator = passwordGenerator;
         }
 
-        public async Task<CreateDoctorResponse> CreateDoctorAsync(CreateDoctorRequest request)
+        public async Task<CreateUserResponse> CreateDoctorAsync(CreateDoctorRequest request)
         {
             var existingUser = await userManager.FindByNameAsync(request.UserName);
             if (existingUser != null)
             {
-                return new CreateDoctorResponse { IsSuccessful = false, Message = "User already exists!", StatusCode = StatusCodes.Status400BadRequest };
+                return new CreateUserResponse { IsSuccessful = false, Message = "User already exists!", StatusCode = StatusCodes.Status400BadRequest };
             }
 
-            var user = new User() 
+            var user = new User()
             {
                 FirstName = request.Firstname,
                 LastName = request.Lastname,
@@ -53,7 +53,7 @@ namespace Dialysis.BLL.Users
             };
 
             var password = passwordGenerator.GeneratePassword(identityOptions.Password);
-            
+
             await userManager.CreateAsync(user, password);
             await userManager.AddToRoleAsync(user, Role.Doctor);
 
@@ -68,17 +68,17 @@ namespace Dialysis.BLL.Users
 
             await context.Doctors.AddAsync(doctor);
             await context.SaveChangesAsync();
-            return new CreateDoctorResponse { Password = password, UserName = request.UserName, IsSuccessful = true, StatusCode = StatusCodes.Status201Created };
+            return new CreateUserResponse { Password = password, UserName = request.UserName, IsSuccessful = true, StatusCode = StatusCodes.Status201Created };
         }
 
-        public async Task<CreatePatientResponse> CreatePatientAsync(CreatePatientRequest request)
+        public async Task<CreateUserResponse> CreatePatientAsync(CreatePatientRequest request)
         {
             var existingUser = await userManager.FindByNameAsync(request.UserName);
             if (existingUser != null)
             {
-                return new CreatePatientResponse { IsSuccessful = false, Message = "User already exists!", StatusCode = StatusCodes.Status400BadRequest };
+                return new CreateUserResponse { IsSuccessful = false, Message = "User already exists!", StatusCode = StatusCodes.Status400BadRequest };
             }
-            
+
             var user = new User()
             {
                 FirstName = request.Firstname,
@@ -104,7 +104,7 @@ namespace Dialysis.BLL.Users
 
             await context.Patients.AddAsync(patient);
             await context.SaveChangesAsync();
-            return new CreatePatientResponse { Password = password, UserName = request.UserName, IsSuccessful = true, StatusCode = StatusCodes.Status201Created };
+            return new CreateUserResponse { Password = password, UserName = request.UserName, IsSuccessful = true, StatusCode = StatusCodes.Status201Created };
         }
 
         public async Task<BaseResponse> AssignPatientToDoctorAsync(AssignPatientToDoctorRequest request)
@@ -129,10 +129,11 @@ namespace Dialysis.BLL.Users
             }
             catch (Exception e)
             {
-                return new BaseResponse 
-                { 
-                    IsSuccessful = false, 
-                    Message = $"An error was thrown while trying to assign patient to doctor: {e}" 
+                return new BaseResponse
+                {
+                    IsSuccessful = false,
+                    Message = $"An error was thrown while trying to assign patient to doctor: {e}",
+                    StatusCode = StatusCodes.Status500InternalServerError
                 };
             }
 
@@ -174,7 +175,7 @@ namespace Dialysis.BLL.Users
             return new BaseResponse { IsSuccessful = true, StatusCode = StatusCodes.Status200OK };
         }
 
-        public async Task<BaseResponse> DeleteDoctor(int id) 
+        public async Task<BaseResponse> DeleteDoctor(int id)
         {
             var doctorToDelete = context.Doctors
                 .Where(d => d.DoctorID == id)
@@ -242,7 +243,7 @@ namespace Dialysis.BLL.Users
             return new BaseResponse { IsSuccessful = true, StatusCode = StatusCodes.Status200OK };
         }
 
-        public async Task<BaseResponse> EditDoctor(int id, DoctorDTO doctorDTO) 
+        public async Task<BaseResponse> EditDoctor(int id, DoctorDTO doctorDTO)
         {
             var oldDoctor = context.Doctors
                 .Where(d => d.DoctorID == id)
@@ -278,9 +279,10 @@ namespace Dialysis.BLL.Users
             return new BaseResponse { IsSuccessful = true, StatusCode = StatusCodes.Status200OK };
         }
 
-        public async Task<GetDoctorsResponse> GetDoctors(bool includePatients, Func<Doctor, bool> filter = null) 
+        public async Task<GetDoctorsResponse> GetDoctors(bool includePatients, Func<Doctor, bool> filter = null)
         {
             var doctors = context.Doctors
+                .Include(x => x.Patients)
                 .AsNoTracking()
                 .Where(filter ?? (x => true)).ToList();
 
@@ -294,9 +296,10 @@ namespace Dialysis.BLL.Users
             return new GetDoctorsResponse { StatusCode = StatusCodes.Status200OK, Doctors = result };
         }
 
-        public async Task<GetPatientsResponse> GetPatients(bool includeDoctors,Func<Patient, bool> filter = null)
+        public async Task<GetPatientsResponse> GetPatients(bool includeDoctors, Func<Patient, bool> filter = null)
         {
             var patients = context.Patients
+                .Include(x => x.Doctors)
                 .AsNoTracking()
                 .Where(filter ?? (p => true)).ToList();
 
@@ -308,6 +311,64 @@ namespace Dialysis.BLL.Users
             var result = mapper.Map<IEnumerable<PatientDTO>>(patients);
 
             return new GetPatientsResponse { StatusCode = StatusCodes.Status200OK, Patients = result };
+        }
+
+        public async Task<CreateUserResponse> ResetUsersPassword(ResetUsersPasswordRequest request)
+        {
+            var response = new CreateUserResponse();
+            var user = await userManager.FindByNameAsync(request.UserName);
+            if (user == null)
+            {
+                response.StatusCode = StatusCodes.Status404NotFound;
+                response.Message = "Could not find user with matching username";
+                response.IsSuccessful = false;
+            }
+
+            var newPassword = passwordGenerator.GeneratePassword(identityOptions.Password);
+            await userManager.RemovePasswordAsync(user);
+            await userManager.AddPasswordAsync(user, newPassword);
+
+            response.StatusCode = StatusCodes.Status200OK;
+            response.IsSuccessful = true;
+            response.UserName = request.UserName;
+            response.Password = newPassword;
+            return response;
+        }
+
+        public async Task<GetUserInfoResponse> GetUserInfo(string userName)
+        {
+            var response = new GetUserInfoResponse();
+            var user = await userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                response.StatusCode = StatusCodes.Status404NotFound;
+                response.Message = "Could not find user with matching username";
+            }
+
+            var role = (await userManager.GetRolesAsync(user)).First();
+
+            response.UserName = user.UserName;
+            response.Role = role;
+            response.FirstName = user.FirstName;
+            response.LastName = user.LastName;
+
+            switch (role)
+            {
+                case Role.Doctor:
+                    var doctorInfo = await GetDoctors(false, x => x.UserID == user.Id);
+                    response.InternalUserID = doctorInfo.Doctors.FirstOrDefault().DoctorID;
+                    break;
+
+                case Role.Patient:
+                    var patientInfo = await GetPatients(false, x => x.UserID == user.Id);
+                    response.InternalUserID = patientInfo.Patients.FirstOrDefault().PatientID;
+                    break;
+
+                default:
+                    break;
+            }
+            response.StatusCode = StatusCodes.Status200OK;
+            return response;
         }
     }
 }

@@ -15,5 +15,6 @@ namespace Dialysis.BLL.Examinations
         Task<bool> AddExamination(ExaminationDTO examination);
         Task<bool> DeleteExamination(int id);
         Task<bool> EditExamination(int id, ExaminationDTO examination);
+        Task<IEnumerable<ExaminationDTO>> GetExaminationsByPatientId(int id);
     }
 }

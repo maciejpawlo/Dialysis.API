@@ -22,7 +22,6 @@ using IdentityPasswordGenerator;
 using Dialysis.BLL.Examinations;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddIdentity<User, IdentityRole>(cfg =>
 {
     cfg.User.RequireUniqueEmail = false;
@@ -48,6 +47,11 @@ builder.Services.AddAuthentication(x =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Tokens:Key"])),
     };
 });
+
+builder.Services.AddCors(p => p.AddPolicy("mycors", builder =>
+{
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
 
 builder.Services.AddTransient<DialysisSeeder>();
 
@@ -76,7 +80,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
-
+app.UseCors("mycors");
 app.UseAuthentication();
 app.UseAuthorization();
 

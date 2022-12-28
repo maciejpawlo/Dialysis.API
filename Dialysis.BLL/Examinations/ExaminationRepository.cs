@@ -31,6 +31,7 @@ namespace Dialysis.BLL.Examinations
                 return false;
 
             var newExamination = mapper.Map<Examination>(examination);
+            newExamination.CreatedAt = DateTime.Now;
             await context.Examinations.AddAsync(newExamination);
             return await context.SaveChangesAsync() > 0;
         }
@@ -83,6 +84,18 @@ namespace Dialysis.BLL.Examinations
             mapper.Map(examination, oldExamination);
 
             return await context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<ExaminationDTO>> GetExaminationsByPatientId(int id)
+        {
+            var examinations = await context.Examinations
+                .AsNoTracking()
+                .Where(e => e.PatientID == id)
+                .ToListAsync();
+
+            var result = mapper.Map<IEnumerable<ExaminationDTO>>(examinations);
+
+            return result;
         }
     }
 }

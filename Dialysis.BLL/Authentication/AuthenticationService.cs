@@ -33,6 +33,13 @@ namespace Dialysis.BLL.Authentication
         {
             var response = new AuthenticateResponse();
             var user = await userManager.FindByNameAsync(authenticateRequest.UserName);
+            if (user == null)
+            {
+                response.StatusCode = StatusCodes.Status401Unauthorized;
+                response.IsSuccessful = false;
+                return response;
+            }
+
             var result = await signInManager.CheckPasswordSignInAsync(user, authenticateRequest.Password, false);
 
             if (result.Succeeded)
@@ -42,16 +49,20 @@ namespace Dialysis.BLL.Authentication
 
                 var claims = new[]
                 {
-                  //new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                  new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                  new Claim(JwtRegisteredClaimNames.Sub, userId),
                   new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-                  new Claim(ClaimTypes.Role, role.FirstOrDefault()),
+                  new Claim(ClaimTypes.Role, role.FirstOrDefault())
                 };
                 var jwtResult = jwtHandler.GenerateTokens(userId, claims, DateTime.UtcNow);
                 
                 response.IsSuccessful = true;
                 response.AccessToken = jwtResult.AccessToken;
                 response.UserName = authenticateRequest.UserName;
+                response.RefreshToken = jwtResult.RefreshToken.Token;
+                response.RefreshTokenExpireDate = jwtResult.RefreshToken.ExpiresAt;
+                response.StatusCode = StatusCodes.Status200OK;
                 return response;
             }
             response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -59,11 +70,11 @@ namespace Dialysis.BLL.Authentication
             return response;
         }
 
-        public async Task<BaseResponse> ChangePassword(ChangePasswordRequest resetPasswordRequest, string userName)
+        public async Task<BaseResponse> ChangePassword(ChangePasswordRequest changePasswordRequest, string userName)
         {
             var response = new BaseResponse();
             var user = await userManager.FindByNameAsync(userName);
-            var changePasswordResult = await userManager.ChangePasswordAsync(user, resetPasswordRequest.OldPassword, resetPasswordRequest.NewPassword);
+            var changePasswordResult = await userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword, changePasswordRequest.NewPassword);
             if (!changePasswordResult.Succeeded)
             {
                 response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -73,7 +84,7 @@ namespace Dialysis.BLL.Authentication
             return response;
         }
 
-        public async Task<AuthenticateResponse> ResfreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
+        public async Task<AuthenticateResponse> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
         {
             var response = new AuthenticateResponse();
 
@@ -92,7 +103,8 @@ namespace Dialysis.BLL.Authentication
 
             var claims = new[]
             {
-                  //new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                  new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                  new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? string.Empty),
                   new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                   new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
                   new Claim(ClaimTypes.Role, role.FirstOrDefault()),
@@ -100,9 +112,54 @@ namespace Dialysis.BLL.Authentication
 
             var jwtResult = jwtHandler.RefreshToken(refreshToken, claims, DateTime.UtcNow);
 
-            response.AccessToken = jwtResult.AccessToken;
+            if (jwtResult is null)
+            {
+                response.IsSuccessful = false;
+                response.StatusCode = StatusCodes.Status404NotFound;
+                response.Message = "Refresh token invalid";
+                return response;
+            }
+
+            response.AccessToken = jwtResult?.AccessToken;
             response.RefreshToken = jwtResult?.RefreshToken.Token;
+            response.RefreshTokenExpireDate = (DateTime)jwtResult?.RefreshToken.ExpiresAt;
             response.StatusCode = StatusCodes.Status200OK;
+            return response;
+        }
+
+        public async Task<BaseResponse> SetFirstPasswordAsync(SetFirstPasswordRequest request, string userName)
+        {
+            var response = new BaseResponse();
+            var user = await userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                response.StatusCode = StatusCodes.Status404NotFound;
+                response.Message = "Could not find user with matching username";
+                response.IsSuccessful = false;
+            }
+
+            if (string.IsNullOrEmpty(user.Email))
+            {
+                response.StatusCode = StatusCodes.Status400BadRequest;
+                response.Message = "User had already set the password";
+                response.IsSuccessful = false;
+            }
+
+            var setEmailResult = await userManager.SetEmailAsync(user, request.Email);
+            if (!setEmailResult.Succeeded)
+            {
+                response.StatusCode = StatusCodes.Status500InternalServerError;
+                response.Message = "Could not set user's email";
+                response.IsSuccessful = false;
+            }
+
+            //remove temporary password
+            await userManager.RemovePasswordAsync(user);
+            //set new password
+            await userManager.AddPasswordAsync(user, request.Password);
+
+            response.StatusCode = StatusCodes.Status200OK;
+            response.IsSuccessful = true;
             return response;
         }
     }
